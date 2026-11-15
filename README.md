@@ -38,6 +38,7 @@ AI Agent (Google Gemini)
    v
 Google Calendar Tool
 ```
+![n8n Workflow Architecture](n8n.png)
 
 ## Implemented Features
 
