@@ -12,7 +12,7 @@ The system uses ElevenLabs Conversational AI to communicate with patients, n8n t
 
 **Project Status:** Prototype under development. End-to-end calendar booking and confirmation are still being tested.
 
-## Technologies Used
+Technologies Used
 
 - **ElevenLabs Conversational AI:** Voice-based patient interaction
 - **n8n:** Workflow automation and orchestration
