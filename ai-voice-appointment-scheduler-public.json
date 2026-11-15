@@ -1,0 +1,121 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "replace-with-your-own-webhook-path",
+        "options": {}
+      },
+      "id": "fe6bec6c-6afa-4d25-af29-15c90cb91d0a",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        -320,
+        16
+      ],
+      "webhookId": "00000000-0000-4000-8000-000000000001"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=\nPatient appointment request:\n\nPatient name: {{ $json.body.User_name }}\nDental service: {{ $json.body.service }}\nAppointment date: {{ $json.body.date }}\nAppointment time: {{ $json.body.time }}\nPhone number: {{ $json.body.phone_number }}\n\nValidate the information and process the appointment request according to your system instructions.\n\nYou must use the Google Calendar tool to create this event. Set the event title as \"Patient Name and Service\". After successfully creating the event, respond with the short confirmation message\n",
+        "options": {
+          "systemMessage": "You are a dental clinic appointment assistant. Validate the patient request (name, service, date, time, phone). Spoken values such as \"two PM\" should be converted to proper times, and dates are ISO format. Use the Google Calendar tool to create the event, then reply with a short confirmation.",
+          "maxIterations": 4,
+          "enableStreaming": false
+        }
+      },
+      "id": "fc459781-9bbb-4ffa-987d-ac7f68178bfb",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        64,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash",
+        "options": {}
+      },
+      "id": "0c7b31d8-b6fc-4414-bca7-39b246a4125f",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        16,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "YOUR_CALENDAR_ID",
+          "mode": "list",
+          "cachedResultName": "YOUR_CALENDAR_ID"
+        },
+        "start": "={{ $fromAI('Start', `Event start as ISO 8601 datetime in Europe/Berlin, e.g. 2026-11-16T16:00:00+01:00`, 'string') }}",
+        "end": "={{ $fromAI('End', `Event end as ISO 8601 datetime in Europe/Berlin, 1 hour after the start`, 'string') }}",
+        "additionalFields": {
+          "summary": "={{ $('Webhook').item.json.body.User_name }} - {{ $('Webhook').item.json.body.service }}"
+        }
+      },
+      "id": "b8579586-2c2f-4f1d-9f5b-fc71adc21d37",
+      "name": "Create an event in Google Calendar",
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.4,
+      "position": [
+        256,
+        48
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "nodeGroups": [],
+  "tags": []
+}
